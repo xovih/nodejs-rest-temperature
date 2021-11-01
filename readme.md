@@ -11,7 +11,7 @@
 npm install
 ```
 
-## .env file contain
+## .env file contains :
 
 ```
 APP_PORT = YOUR_PORT
