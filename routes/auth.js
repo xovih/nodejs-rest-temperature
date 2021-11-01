@@ -6,34 +6,6 @@ const dotenv = require("dotenv")
 
 dotenv.config()
 
-// REGISTER
-router.post("/register", async (req, res) => {
-  try {
-    const { username, fullname, password, isAdmin } = req.body
-
-    const salt = await bcrypt.genSalt(10)
-    const hashedPassword = await bcrypt.hash(password, salt)
-
-    const newUser = new User({
-      username,
-      fullname,
-      password: hashedPassword,
-      isAdmin
-    })
-
-    const user = await newUser.save()
-    return res.status(201).json(
-      {
-        failed: false,
-        message: "Successfully created new user !"
-      }
-    )
-
-  } catch (err) {
-    return res.status(500).json(err)
-  }
-})
-
 // LOGIN
 router.post("/login", async (req, res) => {
   try {
@@ -43,7 +15,7 @@ router.post("/login", async (req, res) => {
     if (!user) {
       return res.status(401).json(
         {
-          failed: true,
+          error: true,
           message: "Wrong Credentials !"
         }
       )
@@ -54,7 +26,7 @@ router.post("/login", async (req, res) => {
 
       return res.status(401).json(
         {
-          failed: true,
+          error: true,
           message: "Wrong Credentials !"
         }
       )
@@ -69,7 +41,7 @@ router.post("/login", async (req, res) => {
 
     return res.status(200).json(
       {
-        failed: false,
+        error: false,
         message: "Login Successfully !",
         data: { ...data, accessToken }
       }

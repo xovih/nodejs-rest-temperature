@@ -3,30 +3,34 @@ const User = require("../models/User")
 const bcrypt = require("bcrypt")
 const verify = require("../middlewares/verifyToken")
 
-// UPDATE
-router.put("/:id", verify, async (req, res) => {
+// ADD USER
+router.post("/", verify, async (req, res) => {
   try {
-    if (req.user.id === req.params.id || req.user.isAdmin) {
-      if (req.body.password) {
-        const salt = await bcrypt.genSalt(10)
-        const hashedPassword = await bcrypt.hash(req.body.password, salt)
-      }
+    if (req.user.isAdmin) {
+      const { username, fullname, password, isAdmin } = req.body
 
-      const updateUser = await User.findByIdAndUpdate(req.params.id, {
-        $set: req.body
+      const salt = await bcrypt.genSalt(10)
+      const hashedPassword = await bcrypt.hash(password, salt)
+
+      const newUser = new User({
+        username,
+        fullname,
+        password: hashedPassword,
+        isAdmin
       })
 
-      return res.status(200).json(
+      await newUser.save()
+      return res.status(201).json(
         {
-          failed: false,
-          message: "Successfully update current user !"
+          error: false,
+          message: "Successfully created new user !"
         }
       )
     } else {
       return res.status(403).json(
         {
-          failed: true,
-          message: "You're not Authorized to update this Account !"
+          error: true,
+          message: "You're not Authorized to Add any Account !"
         }
       )
     }
@@ -34,6 +38,48 @@ router.put("/:id", verify, async (req, res) => {
   } catch (err) {
     return res.status(500).json(err)
   }
+})
+
+// UPDATE
+router.get("/lala", async (req, res) => {
+  console.log(req)
+  // try {
+  //   if (req.user.id === req.params.id || req.user.isAdmin) {
+  //     const { username, fullname, profilPicture, isAdmin } = req.body
+  //     let password = undefined
+  //     if (req.body.password) {
+  //       const salt = await bcrypt.genSalt(10)
+  //       password = await bcrypt.hash(req.body.password, salt)
+  //     }
+
+  //     const updateUser = await User.findByIdAndUpdate(req.params.id, {
+  //       $set: {
+  //         username,
+  //         fullname,
+  //         password,
+  //         profilPicture,
+  //         isAdmin
+  //       }
+  //     })
+
+  //     return res.status(200).json(
+  //       {
+  //         error: false,
+  //         message: "Successfully update current user !"
+  //       }
+  //     )
+  //   } else {
+  //     return res.status(403).json(
+  //       {
+  //         error: true,
+  //         message: "You're not Authorized to update this Account !"
+  //       }
+  //     )
+  //   }
+
+  // } catch (err) {
+  //   return res.status(500).json(err)
+  // }
 })
 
 // DELETE
@@ -45,14 +91,14 @@ router.delete("/:id", verify, async (req, res) => {
 
       return res.status(200).json(
         {
-          failed: false,
+          error: false,
           message: "User has been deleted !"
         }
       )
     } else {
       return res.status(403).json(
         {
-          failed: true,
+          error: true,
           message: "You're not Authorized to delete this Account !"
         }
       )
@@ -71,7 +117,7 @@ router.get("/detail/:id", verify, async (req, res) => {
 
     return res.status(200).json(
       {
-        failed: false,
+        error: false,
         data: data
       }
     )
@@ -113,7 +159,7 @@ router.get("/", verify, async (req, res) => {
     } else {
       return res.status(403).json(
         {
-          failed: true,
+          error: true,
           message: "You're not Authorized to access this Module !"
         }
       )
