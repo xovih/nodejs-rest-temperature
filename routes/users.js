@@ -3,8 +3,10 @@ const User = require("../models/User")
 const bcrypt = require("bcrypt")
 const verify = require("../middlewares/verifyToken")
 
+router.use(verify)
+
 // ADD USER
-router.post("/", verify, async (req, res) => {
+router.post("/", async (req, res) => {
 	try {
 		if (req.user.isAdmin) {
 			const { username, fullname, password, isAdmin } = req.body
@@ -36,7 +38,7 @@ router.post("/", verify, async (req, res) => {
 })
 
 // UPDATE
-router.put("/:id", verify, async (req, res) => {
+router.put("/:id", async (req, res) => {
 	try {
 		if (req.user.id === req.params.id || req.user.isAdmin) {
 			const { username, fullname, profilPicture, isAdmin } = req.body
@@ -46,7 +48,7 @@ router.put("/:id", verify, async (req, res) => {
 				password = await bcrypt.hash(req.body.password, salt)
 			}
 
-			const updateUser = await User.findByIdAndUpdate(req.params.id, {
+			await User.findByIdAndUpdate(req.params.id, {
 				$set: {
 					username,
 					fullname,
@@ -72,7 +74,7 @@ router.put("/:id", verify, async (req, res) => {
 })
 
 // DELETE
-router.delete("/:id", verify, async (req, res) => {
+router.delete("/:id", async (req, res) => {
 	try {
 		if (req.user.isAdmin) {
 			await User.findByIdAndDelete(req.params.id)
@@ -93,7 +95,7 @@ router.delete("/:id", verify, async (req, res) => {
 })
 
 // GET
-router.get("/detail/:id", verify, async (req, res) => {
+router.get("/:id", async (req, res) => {
 	try {
 		const user = await User.findById(req.params.id)
 		const { password, ...data } = user._doc
@@ -108,7 +110,7 @@ router.get("/detail/:id", verify, async (req, res) => {
 })
 
 // GET ALL
-router.get("/", verify, async (req, res) => {
+router.get("/", async (req, res) => {
 	try {
 		let page = req.query.p ? req.query.p : 1
 		const search = req.query.s
@@ -118,8 +120,8 @@ router.get("/", verify, async (req, res) => {
 			const userCount = search
 				? await User.count({
 						$or: [
-							{ username: { $regex: ".*" + search + ".*" } },
-							{ fullname: { $regex: ".*" + search + ".*" } },
+							{ username: { $regex: ".*" + search + ".*", $options: "si" } },
+							{ fullname: { $regex: ".*" + search + ".*", $options: "si" } },
 						],
 				  })
 				: await User.count()
@@ -130,8 +132,8 @@ router.get("/", verify, async (req, res) => {
 			const data = search
 				? await User.find({
 						$or: [
-							{ username: { $regex: ".*" + search + ".*" } },
-							{ fullname: { $regex: ".*" + search + ".*" } },
+							{ username: { $regex: ".*" + search + ".*", $options: "si" } },
+							{ fullname: { $regex: ".*" + search + ".*", $options: "si" } },
 						],
 				  })
 						.sort({ _id: -1 })
