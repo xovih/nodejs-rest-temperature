@@ -1,17 +1,20 @@
 const mongoose = require("mongoose")
+require("mongoose-double")(mongoose)
+
+const SchemaTypes = mongoose.Schema.Types;
 
 const TemperatureSchema = new mongoose.Schema(
   {
     temperature: {
-      type: Double,
+      type: SchemaTypes.Double,
       required: true,
     },
     humidity: {
-      type: Double,
+      type: SchemaTypes.Double,
       required: true,
     },
     device: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: SchemaTypes.ObjectId,
       ref: 'Device',
     }
   },
